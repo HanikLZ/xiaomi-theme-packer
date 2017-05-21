@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.ComboBox?>
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="window-frame" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.mdvsc.tools.xiaomi.skin.controller.SelectorController">
+    <children>
+
+        <AnchorPane prefWidth="550.0">
+            <children>
+
+                <ProgressBar fx:id="progressBar" prefHeight="40.0" progress="0.0" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                <Label fx:id="labelStatus" prefHeight="40.0" textFill="BLACK" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets left="10.0" right="10.0" />
+                    </padding>
+                </Label>
+
+                <HBox alignment="CENTER_RIGHT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <ToggleButton id="frontButton" fx:id="toggleButtonTop" prefHeight="40.0" prefWidth="40.0" textAlignment="CENTER" textFill="#999999">
+                        <font>
+                            <Font name="Heiti SC Light" size="15.0" />
+                        </font>
+                    </ToggleButton>
+                   <Button id="setingButton" mnemonicParsing="false" onAction="#actionPreference" prefHeight="40.0" prefWidth="40.0" textAlignment="CENTER" textFill="#999999">
+                           <font>
+                               <Font name="Heiti SC Light" size="15.0" />
+                           </font>
+                       </Button>
+                    <Button id="closeButton" alignment="CENTER" onAction="#actionClose" prefHeight="40.0" prefWidth="40.0" textAlignment="CENTER" textFill="#999999">
+                        <font>
+                            <Font name="Heiti SC Light" size="15.0" />
+                        </font>
+                    </Button>
+                </HBox>
+
+                <Label fx:id="labelNotification" alignment="CENTER" disable="true" prefHeight="40.0" textFill="WHITE" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <font>
+                        <Font name="Heiti SC Light" size="15.0" />
+                    </font>
+                </Label>
+
+            </children>
+        </AnchorPane>
+
+        <HBox alignment="CENTER_LEFT" spacing="5.0">
+            <children>
+            <Button fx:id="buttonInfo" id="infoButton" mnemonicParsing="false" onAction="#actionInfo" prefHeight="16.0" prefWidth="16.0" style="-fx-background-radius: 1;" textFill="#999999">
+               <font>
+                  <Font name="Heiti SC Light" size="1.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="2.0" />
+               </HBox.margin>
+            </Button>
+                <Label fx:id="labelTheme" text="请先打开主题" textFill="#999999">
+                    <font>
+                        <Font name="Heiti SC Light" size="14.0" />
+                    </font>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+                </Label>
+            </children>
+            <VBox.margin>
+                <Insets left="20.0" right="20.0" />
+            </VBox.margin>
+        </HBox>
+        <ComboBox fx:id="comboBoxPath" editable="true" prefHeight="40.0" prefWidth="510.0" promptText="直接拖拽文件夹到这里可以打开主题哦">
+            <VBox.margin>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="8.0" />
+            </VBox.margin>
+        </ComboBox>
+        <HBox alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="290.0" spacing="10.0">
+            <VBox.margin>
+                <Insets bottom="20.0" left="20.0" right="20.0"/>
+            </VBox.margin>
+            <Button id="applyButton" fx:id="buttonApply" alignment="CENTER" mnemonicParsing="false"
+                    onAction="#actionApply" prefHeight="40.0" prefWidth="150.0" text="应用主题"
+                    textFill="WHITE">
+                <font>
+                    <Font name="Heiti SC Light" size="15.0"/>
+                </font>
+                <HBox.margin>
+                    <Insets right="180.0"/>
+                </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#actionOpen" prefHeight="40.0" prefWidth="80.0" text="打开"
+                    textFill="#999999">
+                <font>
+                    <Font name="Heiti SC Light" size="15.0"/>
+                </font>
+            </Button>
+            <Button fx:id="buttonExport" alignment="CENTER" mnemonicParsing="false" onAction="#actionExport"
+                    prefHeight="40.0" prefWidth="80.0" text="导出" textFill="#999999">
+                <font>
+                    <Font name="Heiti SC Light" size="15.0"/>
+                </font>
+            </Button>
+        </HBox>
+
+    </children>
+    <opaqueInsets>
+        <Insets />
+    </opaqueInsets>
+</VBox>

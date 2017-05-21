@@ -1,0 +1,34 @@
+.button {-fx-background-color: #FBFAFC;-fx-text-fill: #333333; -fx-border-width: 0.5px; -fx-border-color: rgba(0,0,0,0.15); -fx-border-radius: 6px; -fx-background-radius: 6px;}
+.button:disabled {-fx-background-color: #FFFFFF;-fx-text-fill: #999999;}
+.button:pressed {-fx-background-color: rgba(238,237,239,1.0);}
+.text-field {-fx-background-color: #FFFFFF; -fx-border-width: 0.5px; -fx-border-color: #D7D7D7; -fx-border-radius: 6px;}
+
+.toggle-button {-fx-background-color: #FBFAFC;-fx-text-fill: #333333; -fx-border-width: 0.5px; -fx-border-color: rgba(0,0,0,0.15); -fx-border-radius: 6px; -fx-background-radius: 6px;}
+.window-frame {-fx-border-width: 0px; -fx-border-color: rgba(0,0,0,0.15);}
+.toggle-button:disabled {-fx-background-color: #FFFFFF;-fx-text-fill: #999999;}
+.toggle-button:pressed {-fx-background-color: rgba(0,0,0,0.1);-fx-text-fill: #999999;}
+.toggle-button:selected {-fx-background-color: rgba(9,187,7,1.0);-fx-text-fill: #ffffff;}
+
+#notificationWarning {-fx-background-color: rgba(208,2,27,0.5);}
+#notificationError {-fx-background-color: rgba(208,2,27,0.5);}
+#notificationInfo {-fx-background-color: rgba(9,187,7,0.5);}
+/*应用主题*/
+#applyButton {-fx-border-radius: 6px; -fx-background-color: rgba(9,187,7,1.0); -fx-background-radius: 6px; -fx-text-fill: #FFFFFF; -fx-border-width: 0px;}
+#applyButton:pressed {-fx-background-color: rgba(8,168,6,1.0);}
+#applyButton:disabled {-fx-background-color: rgba(9,187,7,0.4);}
+/*关闭按钮背景*/
+#closeButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_close.png');}
+#closeButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
+#closeButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
+/*设置按钮背景*/
+#setingButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_seting.png');}
+#setingButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
+#setingButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
+/*置顶按钮背景*/
+#frontButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_front.png');}
+#frontButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
+#frontButton:selected {-fx-background-image: url('../image/ic_front_p.png');}
+/*主题信息按钮按钮背景*/
+#infoButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_info.png');}
+#infoButton:pressed {-fx-background-image: url('../image/ic_info_p.png');}
+#infoButton:selected {-fx-background-image: url('../image/ic_info_p.png');}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox styleClass="window-frame" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.mdvsc.tools.xiaomi.skin.controller.InformationController">
+    <AnchorPane prefWidth="570.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1">
+        <children>
+            <Separator layoutX="51.0" layoutY="59.0" prefHeight="0.5" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" />
+            <Label alignment="CENTER" layoutX="275.0" layoutY="20.0" prefHeight="50.0" style="-fx-background-color: #FFFFFF;" text="编辑主题信息" textFill="#333333" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <font>
+                    <Font name="Heiti SC Light" size="16.0" />
+                </font>
+            </Label>
+            <Button id="closeButton" alignment="CENTER" layoutX="547.0" layoutY="4.0" onAction="#actionClose" prefHeight="40.0" prefWidth="40.0" textFill="#999999" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                <font>
+                    <Font name="Heiti SC Light" size="15.0" />
+                </font>
+            </Button>
+        </children>
+    </AnchorPane>
+    <VBox prefHeight="500.0" prefWidth="570.0" style="-fx-background-color: #F5F5F5;">
+        <VBox.margin>
+            <Insets />
+        </VBox.margin>
+        <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="40.0" />
+        </padding>
+        <children>
+            <Label text="主题名称" textFill="#999999">
+                <font>
+                    <Font name="Heiti SC Light" size="14.0" />
+                </font>
+                <VBox.margin>
+                    <Insets bottom="4.0" left="74.0" />
+                </VBox.margin>
+            </Label>
+            <TextField fx:id="textFieldTitle" prefHeight="40.0" prefWidth="400.0" promptText="无名主题">
+                <VBox.margin>
+                    <Insets left="70.0" right="70.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="16.0" />
+                </font>
+            </TextField>
+            <Label text="设计师" textFill="#999999">
+                <VBox.margin>
+                    <Insets bottom="4.0" left="74.0" top="16.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="14.0" />
+                </font>
+            </Label>
+            <TextField fx:id="textFieldDesigner" prefHeight="40.0" prefWidth="400.0" promptText="私人定制">
+                <VBox.margin>
+                    <Insets left="70.0" right="70.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="16.0" />
+                </font>
+            </TextField>
+            <Label text="制作者" textFill="#999999">
+                <VBox.margin>
+                    <Insets bottom="4.0" left="74.0" top="16.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="14.0" />
+                </font>
+            </Label>
+            <TextField fx:id="textFieldAuthor" prefHeight="40.0" prefWidth="400.0" promptText="私人定制">
+                <VBox.margin>
+                    <Insets left="70.0" right="70.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="16.0" />
+                </font>
+            </TextField>
+            <Label text="版本号" textFill="#999999">
+                <VBox.margin>
+                    <Insets bottom="4.0" left="74.0" top="16.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="14.0" />
+                </font>
+            </Label>
+            <TextField fx:id="textFieldVersion" prefHeight="40.0" prefWidth="400.0" promptText="1.0.0">
+                <VBox.margin>
+                    <Insets left="70.0" right="70.0" />
+                </VBox.margin>
+                <font>
+                    <Font name="Heiti SC Light" size="16.0" />
+                </font>
+            </TextField>
+            <Label text="UI版本" textFill="#999999">
+                <font>
+                    <Font name="Heiti SC Light" size="14.0" />
+                </font>
+                <VBox.margin>
+                    <Insets bottom="4.0" left="74.0" top="16.0" />
+                </VBox.margin>
+            </Label>
+            <HBox>
+                <children>
+                    <ToggleButton fx:id="buttonUiVersionV7" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="V7" textFill="#333333">
+                        <font>
+                            <Font name="Heiti SC Light" size="18.0" />
+                        </font>
+                  <HBox.margin>
+                     <Insets />
+                  </HBox.margin>
+                    </ToggleButton>
+                    <ToggleButton fx:id="buttonUiVersionV8" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="V8" textFill="#333333">
+                        <HBox.margin>
+                            <Insets left="10.0" />
+                        </HBox.margin>
+                        <font>
+                            <Font name="Heiti SC Light" size="18.0" />
+                        </font>
+                    </ToggleButton>
+                    <ToggleButton fx:id="buttonUiVersionV9" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="V9" textFill="#333333">
+                        <HBox.margin>
+                            <Insets left="10.0" />
+                        </HBox.margin>
+                        <font>
+                            <Font name="Heiti SC Light" size="18.0" />
+                        </font>
+                    </ToggleButton>
+                </children>
+                <VBox.margin>
+                    <Insets left="70.0" right="70.0" />
+                </VBox.margin>
+            </HBox>
+            <ButtonBar>
+                <buttons>
+                    <Button alignment="CENTER" mnemonicParsing="false" onAction="#actionOk" prefHeight="40.0" prefWidth="80.0" text="保存" textFill="#333333">
+                        <font>
+                            <Font name="Heiti SC Light" size="15.0" />
+                        </font>
+                    </Button>
+                </buttons>
+                <VBox.margin>
+                    <Insets top="20.0" />
+                </VBox.margin>
+            </ButtonBar>
+        </children>
+    </VBox>
+</VBox>
