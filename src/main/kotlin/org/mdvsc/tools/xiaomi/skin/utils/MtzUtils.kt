@@ -1,12 +1,15 @@
 package org.mdvsc.tools.xiaomi.skin.utils
 
+import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.util.zip.ZipOutputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.io.FileInputStream
+import java.io.InputStream
 import java.nio.file.Files
+import java.util.zip.ZipInputStream
 
 /**
  * @author HanikLZ
@@ -16,6 +19,33 @@ object MtzUtils {
 
     private val ignoreDirNames = listOf(".DS_Store")
     private val ignoreZipDirNames = listOf("wallpaper")
+
+    fun uncompressMtz(mtzPath: String, targetPath: String, root: Boolean = true) : Boolean {
+        fun File.uncompress(input: InputStream) {
+            if (!exists()) createNewFile()
+            FileOutputStream(this).use { input.copyTo(it) }
+        }
+        var isZip = false
+        FileInputStream(mtzPath).use { ZipInputStream(BufferedInputStream(it)).run {
+            do {
+                val zipEntry = try {nextEntry} catch (ignored: Exception) { return false } ?: break
+                isZip = true
+                val file = File(targetPath, zipEntry.name).apply { parentFile?.mkdirs() }
+                if (zipEntry.isDirectory) file.mkdirs() else {
+                    file.parentFile?.mkdirs()
+                    if (root) {
+                        val tempFile = File(file.parentFile, ".${file.name}")
+                        tempFile.uncompress(this)
+                        if (uncompressMtz(tempFile.absolutePath, file.absolutePath, false)) tempFile.delete() else tempFile.renameTo(file)
+                    } else {
+                        file.uncompress(this)
+                    }
+                }
+                closeEntry()
+            } while (true)
+        } }
+        return isZip
+    }
 
     fun compressFileToMtz(resourcesPath: String, targetFilePath: String, progress : ((Double) -> Unit)? = null) {
         val targetFile = File(targetFilePath).apply { parentFile?.mkdirs() }

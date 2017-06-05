@@ -53,14 +53,14 @@ jfx {
 }
 
 def testngVersion = '6.11'
-def rxjavafxVersion = '2.0.2'
+def rxjavafxVersion = '2.1.0'
 def rxjavaVersion = '2.1.0'
 def commonsLang3Version = '3.5'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
     compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-    compile "io.reactivex:rxjavafx:$rxjavafxVersion"
+    compile "io.reactivex.rxjava2:rxjavafx:$rxjavafxVersion"
     compile "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
     testCompile "org.testng:testng:$testngVersion"
 }

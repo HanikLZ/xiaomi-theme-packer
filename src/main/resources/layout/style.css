@@ -16,14 +16,18 @@
 #applyButton {-fx-border-radius: 6px; -fx-background-color: rgba(9,187,7,1.0); -fx-background-radius: 6px; -fx-text-fill: #FFFFFF; -fx-border-width: 0px;}
 #applyButton:pressed {-fx-background-color: rgba(8,168,6,1.0);}
 #applyButton:disabled {-fx-background-color: rgba(9,187,7,0.4);}
+/*最小化按钮背景*/
+#minimizeButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_minimize.png');}
+#minimizeButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
+#minimizeButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
 /*关闭按钮背景*/
 #closeButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_close.png');}
 #closeButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
 #closeButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
 /*设置按钮背景*/
-#setingButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_seting.png');}
-#setingButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
-#setingButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
+#settingButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_seting.png');}
+#settingButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
+#settingButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
 /*置顶按钮背景*/
 #frontButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_front.png');}
 #frontButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}

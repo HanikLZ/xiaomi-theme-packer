@@ -5,29 +5,36 @@ import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import io.reactivex.schedulers.Schedulers
 import javafx.application.Platform
 import javafx.collections.ListChangeListener
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.control.Alert
-import javafx.scene.control.Button
-import javafx.scene.control.ChoiceDialog
-import javafx.scene.control.ComboBox
-import javafx.scene.control.Label
-import javafx.scene.control.ProgressBar
-import javafx.scene.control.ToggleButton
+import javafx.geometry.Insets
+import javafx.geometry.Pos
+import javafx.scene.control.*
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
+import javafx.stage.Screen
 import javafx.stage.StageStyle
+import org.mdvsc.tools.xiaomi.skin.lang
 import org.mdvsc.tools.xiaomi.skin.model.MIUITheme
 import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences
 import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences.deviceIp
 import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences.devicePort
+import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences.screenshotHistory
 import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences.themeHistory
 import org.mdvsc.tools.xiaomi.skin.preference.AppPreferences.themeHistorySize
 import org.mdvsc.tools.xiaomi.skin.utils.DeviceUtils
 import org.mdvsc.tools.xiaomi.skin.utils.MtzUtils
 import org.mdvsc.tools.xiaomi.skin.utils.fadeOut
 import org.mdvsc.tools.xiaomi.skin.utils.fadeIn
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -95,11 +102,18 @@ class SelectorController : BaseController() {
             valueProperty().addListener { _, _, newValue ->
                 if (newValue != null && newValue != selectedTheme?.themePath?.absolutePath) {
                     if (newValue.isNotBlank()) {
-                        openTheme(newValue)
-                        // selectionModel.clearSelection()
-                        // items.add(0, newValue)
-                        // val removeIndex = items.lastIndexOf(newValue)
-                        // if (removeIndex > 0) items.removeAt(removeIndex)
+                        val file = File(newValue)
+                        if (file.exists()) {
+                            openTheme(file.let {
+                                if (file.isFile) {
+                                    val outFile = File(file.parentFile, file.nameWithoutExtension).let {
+                                        if (it.name == file.name) File(file.parentFile, "${file.name}.unpack") else it
+                                    }
+                                    MtzUtils.uncompressMtz(file.absolutePath, outFile.absolutePath)
+                                    outFile
+                                } else it
+                            }.absolutePath)
+                        }
                     } else {
                         selectedTheme = null
                         refresh()
@@ -194,8 +208,94 @@ class SelectorController : BaseController() {
     }
 
     @FXML
+    fun actionSnapshot() {
+        val outputBytes = ByteArrayOutputStream().also { DeviceUtils.snapshot(it) }.toByteArray()
+        Dialog<String>().apply {
+            val image = outputBytes.inputStream().use { Image(it) }
+            val contextMenu = ContextMenu().also {
+                it.items.addAll(MenuItem("export".lang()).also {
+                    it.setOnAction { writePng(outputBytes) }
+                }, MenuItem("copy".lang()).also {
+                    it.setOnAction { image.copy() }
+                }, MenuItem("close".lang()).also {
+                    it.setOnAction { close() }
+                })
+            }
+            isResizable = true
+            val imageView = ImageView(image).apply {
+                setOnContextMenuRequested { contextMenu.show(this, it.screenX, it.screenY) }
+            }
+
+            fun ImageView.resetFitWidth(width: Double) {
+                fitWidth = width
+                fitHeight = fitWidth / image.width * image.height
+            }
+
+            fun ImageView.resetFitHeight(height: Double) {
+                fitHeight = height
+                fitWidth = fitHeight / image.height * image.width
+            }
+            dialogPane.content = VBox(imageView).apply {
+                alignment = Pos.CENTER
+                padding = Insets.EMPTY
+            }
+            val copy = ButtonType("copy".lang(), ButtonBar.ButtonData.LEFT)
+            val export = ButtonType("export".lang(), ButtonBar.ButtonData.APPLY)
+            dialogPane.buttonTypes.addAll(copy, export, ButtonType("close".lang(), ButtonBar.ButtonData.CANCEL_CLOSE))
+            widthProperty().addListener { _, _, _ ->
+                imageView.resetFitWidth(dialogPane.scene.width)
+                if (imageView.fitHeight > dialogPane.scene.height) {
+                    imageView.resetFitHeight(dialogPane.scene.height)
+                }
+            }
+            heightProperty().addListener { _, _, _ ->
+                imageView.resetFitHeight(dialogPane.scene.height)
+                if (imageView.fitWidth > dialogPane.scene.width) {
+                    imageView.resetFitWidth(dialogPane.scene.width)
+                }
+            }
+            Screen.getPrimary().visualBounds.let { imageView.resetFitHeight(it.height - 100) }
+            dialogPane.lookupButton(copy).addEventFilter(ActionEvent.ACTION, {
+                it.consume()
+                image.copy()
+            })
+            dialogPane.lookupButton(export).addEventFilter(ActionEvent.ACTION, {
+                it.consume()
+                writePng(outputBytes)
+            })
+        }.show()
+    }
+
+    private fun writePng(bytes: ByteArray) {
+        FileChooser().apply {
+            title = "导出屏幕截图"
+            screenshotHistory.get(context.defaultProperties()).let {
+                val file = try {
+                    if (it.isBlank()) throw IllegalArgumentException() else File(it)
+                } catch (ignored: Exception) {
+                    null
+                } ?: File("${Date().time}.png")
+                initialDirectory = file.parentFile
+                initialFileName = file.name
+            }
+            extensionFilters.addAll(FileChooser.ExtensionFilter("png图像", "*.png"))
+        }.showSaveDialog(stage)?.let {
+            if (it.exists()) it.delete()
+            it.createNewFile()
+            it.outputStream().use { it.write(bytes) }
+            showNotification(Alert.AlertType.INFORMATION, "保存屏幕截图 ${it.name}")
+            screenshotHistory.set(context.defaultProperties(), it.absolutePath)
+        }
+    }
+
+    @FXML
     fun actionClose() {
         stage.close()
+    }
+
+    @FXML
+    fun actionMinimize() {
+        stage.isIconified = true
     }
 
     @FXML
@@ -283,7 +383,13 @@ class SelectorController : BaseController() {
     private fun List<String>.toStringValue() = fold(StringBuilder(), { v, e -> v.append(e).append('|') }).run {
         if (length > 0) dropLast(1) else this
     }.toString()
+
     private fun String.toStringList() = split('|').filter { !it.isBlank() }
     private fun <T> Single<T>.defaultScheduler() = subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform())
+
+    private fun Image.copy() {
+        Clipboard.getSystemClipboard().setContent(ClipboardContent().also { it.putImage(this) })
+    }
+
 }
 

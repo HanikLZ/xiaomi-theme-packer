@@ -3,6 +3,7 @@ package org.mdvsc.tools.xiaomi.skin.utils
 import execute
 import outputExecutableBinary
 import java.io.File
+import java.io.OutputStream
 import java.util.regex.Pattern
 
 /**
@@ -30,6 +31,16 @@ object DeviceUtils {
                 , "\"Themeeditor_MUYE_16_8_4_qianye\""
         )
      */
+    fun snapshot(output: OutputStream) = listOf(adbExecutablePath, "exec-out", "screencap -p").execute(output)
+
+    fun snapshot(path: String) = File(path)
+            .apply {
+                if (!exists()) {
+                    parentFile?.mkdirs()
+                    createNewFile()
+                }
+            }.outputStream().use { snapshot(it) }
+
     fun openTcpip(port: Int) = listOf(adbExecutablePath, "tcpip", port.toString()).execute()
 
     fun connect(ip: String, port: Int) = listOf(adbExecutablePath, "connect", "$ip:$port").execute()

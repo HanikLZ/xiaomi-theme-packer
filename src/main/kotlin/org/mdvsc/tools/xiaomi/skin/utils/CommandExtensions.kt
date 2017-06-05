@@ -16,22 +16,42 @@ private fun InputStream.forEach(action: (String) -> Boolean) = BufferedReader(In
     end
 }
 
-fun List<String>.execute(messageCallback: ((String) -> Boolean)? = null) = ProcessBuilder(this)
+fun List<String>.execute(outputStream: OutputStream) = ProcessBuilder(this)
         .redirectErrorStream(true)
         .start().let { process ->
     val commandLine = fold(StringBuilder(), {v, e -> v.append(e).append(' ')}).trim()
     println("run command \"$commandLine\"")
-    if (messageCallback?.let { process.inputStream.forEach(it) } ?: true) {
+    try {
+        process.inputStream.copyTo(outputStream)
         val code = process.waitFor()
         if (code != 0) {
             println("fail, code = $code")
             false
         } else true
-    } else {
-        process.destroy()
-        println("cancelled.")
-        false
-    }
+    } finally { process.destroy() }
+}
+
+
+fun List<String>.execute(messageCallback: ((String) -> Boolean) = {
+    println(it)
+    true
+}) = ProcessBuilder(this)
+        .redirectErrorStream(true)
+        .start().let { process ->
+    val commandLine = fold(StringBuilder(), {v, e -> v.append(e).append(' ')}).trim()
+    println("run command \"$commandLine\"")
+    try {
+        if (process.inputStream.forEach(messageCallback)) {
+            val code = process.waitFor()
+            if (code != 0) {
+                println("fail, code = $code")
+                false
+            } else true
+        } else {
+            println("cancelled.")
+            false
+        }
+    } finally { process.destroy() }
 }
 
 fun outputExecutableBinary(resourcePath: String) : String {
