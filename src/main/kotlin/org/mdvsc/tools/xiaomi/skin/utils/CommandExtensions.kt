@@ -34,7 +34,7 @@ fun List<String>.execute(outputStream: OutputStream) = ProcessBuilder(this)
 
 fun List<String>.execute(messageCallback: ((String) -> Boolean) = {
     println(it)
-    true
+    false
 }) = ProcessBuilder(this)
         .redirectErrorStream(true)
         .start().let { process ->

@@ -9,6 +9,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
@@ -104,15 +105,9 @@ class SelectorController : BaseController() {
                     if (newValue.isNotBlank()) {
                         val file = File(newValue)
                         if (file.exists()) {
-                            openTheme(file.let {
-                                if (file.isFile) {
-                                    val outFile = File(file.parentFile, file.nameWithoutExtension).let {
-                                        if (it.name == file.name) File(file.parentFile, "${file.name}.unpack") else it
-                                    }
-                                    MtzUtils.uncompressMtz(file.absolutePath, outFile.absolutePath)
-                                    outFile
-                                } else it
-                            }.absolutePath)
+                            openTheme(file.themePath())
+                        } else {
+                            showNotification(Alert.AlertType.ERROR, "文件或目录 $newValue 不存在")
                         }
                     } else {
                         selectedTheme = null
@@ -138,12 +133,12 @@ class SelectorController : BaseController() {
         labelTheme.text = selectedTheme?.run { getThemeTitle() } ?: defaultThemeTitle
     }
 
-    private fun doDeviceAction(title: String, header: String, content: String, action: (String) -> Unit) {
+    private fun doDeviceAction(title: String, header: String, content: String, action: (String) -> Unit): Boolean {
         val devices = try {
             DeviceUtils.devices()
         } catch (ignored: Exception) {
             showNotification(Alert.AlertType.WARNING, "ADB未配置，请在设置中尝试修复ADB配置")
-            return
+            return false
         }
         if (devices.isEmpty()) {
             val ip = deviceIp.get(context.defaultProperties())
@@ -168,6 +163,7 @@ class SelectorController : BaseController() {
                 it.contentText = content
             }.showAndWait().ifPresent { action(it) }
         } else action(devices.first())
+        return true
     }
 
     @FXML
@@ -177,16 +173,10 @@ class SelectorController : BaseController() {
 
     @FXML
     fun actionApply() {
-        getThemeFile()?.let {
-            val devices = try {
-                DeviceUtils.devices()
-            } catch (ignored: Exception) {
-                showNotification(Alert.AlertType.WARNING, "ADB未配置，请在设置中尝试修复ADB配置")
-                return
-            }
+        if (!(getThemeFile()?.let {
             val themeFilePath = it.absolutePath
             doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, themeFilePath) }
-        } ?: showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
+        } ?: false)) showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
     }
 
     @FXML
@@ -219,23 +209,40 @@ class SelectorController : BaseController() {
 
     @FXML
     fun actionSnapshot() {
-        doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") {
-            val outputBytes = ByteArrayOutputStream().apply { DeviceUtils.snapshot(it, this) }.toByteArray()
+        doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { deviceName ->
+            var outputBytes = ByteArrayOutputStream().apply { DeviceUtils.snapshot(deviceName, this) }.toByteArray()
+            fun ByteArray.toImage() = inputStream().use { Image(it) }
             Dialog<String>().apply {
-                val image = outputBytes.inputStream().use { Image(it) }
+                initOwner(stage)
+                var image = outputBytes.toImage()
+                val imageView = ImageView(image)
+                fun refreshSnapshot() {
+                    Single.fromCallable {
+                        outputBytes = ByteArrayOutputStream().apply { DeviceUtils.snapshot(deviceName, this) }.toByteArray()
+                        image = outputBytes.toImage()
+                        imageView.image = image
+                    }.doOnSubscribe {
+                        dialogPane.isDisable = true
+                        dialogPane.scene.cursor = Cursor.WAIT
+                    }.defaultScheduler().subscribe { _, _ ->
+                        dialogPane.isDisable = false
+                        dialogPane.scene.cursor = Cursor.DEFAULT
+                    }
+                }
+
                 val contextMenu = ContextMenu().also {
                     it.items.addAll(MenuItem("export".lang()).also {
                         it.setOnAction { writePng(outputBytes) }
                     }, MenuItem("copy".lang()).also {
                         it.setOnAction { image.copy() }
+                    }, MenuItem("refresh".lang()).also {
+                        it.setOnAction { refreshSnapshot() }
                     }, MenuItem("close".lang()).also {
                         it.setOnAction { close() }
                     })
                 }
                 isResizable = true
-                val imageView = ImageView(image).apply {
-                    setOnContextMenuRequested { contextMenu.show(this, it.screenX, it.screenY) }
-                }
+                imageView.setOnContextMenuRequested { contextMenu.show(imageView, it.screenX, it.screenY) }
 
                 fun ImageView.resetFitWidth(width: Double) {
                     fitWidth = width
@@ -251,8 +258,9 @@ class SelectorController : BaseController() {
                     padding = Insets.EMPTY
                 }
                 val copy = ButtonType("copy".lang(), ButtonBar.ButtonData.LEFT)
+                val refresh = ButtonType("refresh".lang(), ButtonBar.ButtonData.LEFT)
                 val export = ButtonType("export".lang(), ButtonBar.ButtonData.APPLY)
-                dialogPane.buttonTypes.addAll(copy, export, ButtonType("close".lang(), ButtonBar.ButtonData.CANCEL_CLOSE))
+                dialogPane.buttonTypes.addAll(copy, refresh, export, ButtonType("close".lang(), ButtonBar.ButtonData.CANCEL_CLOSE))
                 widthProperty().addListener { _, _, _ ->
                     imageView.resetFitWidth(dialogPane.scene.width)
                     if (imageView.fitHeight > dialogPane.scene.height) {
@@ -266,14 +274,13 @@ class SelectorController : BaseController() {
                     }
                 }
                 Screen.getPrimary().visualBounds.let { imageView.resetFitHeight(it.height - 100) }
-                dialogPane.lookupButton(copy).addEventFilter(ActionEvent.ACTION, {
+                fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION, {
                     it.consume()
-                    image.copy()
+                    action()
                 })
-                dialogPane.lookupButton(export).addEventFilter(ActionEvent.ACTION, {
-                    it.consume()
-                    writePng(outputBytes)
-                })
+                copy.clickEvent { image.copy() }
+                export.clickEvent { writePng(outputBytes) }
+                refresh.clickEvent { refreshSnapshot() }
             }.show()
         }
     }
@@ -402,6 +409,16 @@ class SelectorController : BaseController() {
     private fun Image.copy() {
         Clipboard.getSystemClipboard().setContent(ClipboardContent().also { it.putImage(this) })
     }
+
+    private fun File.themePath() = let {
+        if (isFile) {
+            val outFile = File(parentFile, nameWithoutExtension).let {
+                if (it.name == name) File(parentFile, "$name.unpack") else it
+            }
+            MtzUtils.uncompressMtz(absolutePath, outFile.absolutePath)
+            outFile
+        } else it
+    }.absolutePath
 
 }
 

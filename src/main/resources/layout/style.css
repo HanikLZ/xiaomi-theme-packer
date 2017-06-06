@@ -17,7 +17,7 @@
 #applyButton:pressed {-fx-background-color: rgba(8,168,6,1.0);}
 #applyButton:disabled {-fx-background-color: rgba(9,187,7,0.4);}
 /*最小化按钮背景*/
-#minimizeButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_minimize.png');}
+#minimizeButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_min.png');}
 #minimizeButton:pressed {-fx-background-color: rgba(0,0,0,0.1);}
 #minimizeButton:selected {-fx-background-color: rgba(8,168,6,1.0);}
 /*关闭按钮背景*/
@@ -36,3 +36,7 @@
 #infoButton {-fx-background-color: transparent;-fx-border-color: transparent;-fx-border-width: 0px; -fx-border-radius:0px; -fx-background-radius: 0px; -fx-background-image: url('../image/ic_info.png');}
 #infoButton:pressed {-fx-background-image: url('../image/ic_info_p.png');}
 #infoButton:selected {-fx-background-image: url('../image/ic_info_p.png');}
+/*提示条*/
+#labelStatus {-fx-background-color: rgba(9,187,7,0.5);}
+/*路径条*/
+.text-field {-fx-background-color: #FFFFFF; -fx-border-width: 0.5px; -fx-border-color: #D7D7D7; -fx-border-radius: 6px;}
