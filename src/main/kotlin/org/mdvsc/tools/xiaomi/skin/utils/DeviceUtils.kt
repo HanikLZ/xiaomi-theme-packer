@@ -15,31 +15,15 @@ object DeviceUtils {
     private val adbExecutablePath by lazy { outputExecutableBinary("adb") }
     private val pushFileProgressPattern = Pattern.compile("\\d+%")
 
-    /*
-        val commands = listOf(
-                "adb"
-                , "shell"
-                , "am"
-                , "start"
-                , "-n"
-                , "com.android.thememanager/com.android.thememanager.ApplyThemeForScreenshot"
-                , "-e"
-                , "\"theme_file_path\""
-                , "\"/sdcard/MIUI/theme/MIUIThemeToolGenerated.mtz\""
-                , "-e"
-                , "\"api_called_from\""
-                , "\"Themeeditor_MUYE_16_8_4_qianye\""
-        )
-     */
-    fun snapshot(output: OutputStream) = listOf(adbExecutablePath, "exec-out", "screencap -p").execute(output)
+    fun snapshot(device: String, output: OutputStream) = listOf(adbExecutablePath, "-s", device, "exec-out", "screencap -p").execute(output)
 
-    fun snapshot(path: String) = File(path)
+    fun snapshot(device: String, path: String) = File(path)
             .apply {
                 if (!exists()) {
                     parentFile?.mkdirs()
                     createNewFile()
                 }
-            }.outputStream().use { snapshot(it) }
+            }.outputStream().use { snapshot(device, it) }
 
     fun openTcpip(port: Int) = listOf(adbExecutablePath, "tcpip", port.toString()).execute()
 

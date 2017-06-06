@@ -138,6 +138,38 @@ class SelectorController : BaseController() {
         labelTheme.text = selectedTheme?.run { getThemeTitle() } ?: defaultThemeTitle
     }
 
+    private fun doDeviceAction(title: String, header: String, content: String, action: (String) -> Unit) {
+        val devices = try {
+            DeviceUtils.devices()
+        } catch (ignored: Exception) {
+            showNotification(Alert.AlertType.WARNING, "ADB未配置，请在设置中尝试修复ADB配置")
+            return
+        }
+        if (devices.isEmpty()) {
+            val ip = deviceIp.get(context.defaultProperties())
+            if (ip.isNotBlank()) {
+                val port = devicePort.get(context.defaultProperties())
+                Single.fromCallable {
+                    DeviceUtils.connect(ip, port)
+                    DeviceUtils.devices()
+                }.defaultScheduler()
+                        .doAfterTerminate { labelStatus.text = null }
+                        .doOnSubscribe {
+                            progressBar.progress = 1.0
+                            labelStatus.text = "连接到 $ip:$port ..."
+                        }.subscribe({
+                    if (it.isEmpty()) showNotification(Alert.AlertType.WARNING, "没有连接的设备") else action(it.first())
+                }, { println(it.message) })
+            }
+        } else if (devices.size > 1) {
+            ChoiceDialog<String>(devices.first(), devices).also {
+                it.title = title
+                it.headerText = header
+                it.contentText = content
+            }.showAndWait().ifPresent { action(it) }
+        } else action(devices.first())
+    }
+
     @FXML
     fun actionInfo() {
         if (selectedTheme == null) showNotification(Alert.AlertType.WARNING, "请先打开主题") else context.startWindow<BaseController>("/layout/information.fxml", parentStage = stage)
@@ -153,29 +185,7 @@ class SelectorController : BaseController() {
                 return
             }
             val themeFilePath = it.absolutePath
-            if (devices.isEmpty()) {
-                val ip = deviceIp.get(context.defaultProperties())
-                if (ip.isNotBlank()) {
-                    val port = devicePort.get(context.defaultProperties())
-                    Single.fromCallable {
-                        DeviceUtils.connect(ip, port)
-                        DeviceUtils.devices()
-                    }.defaultScheduler()
-                            .doAfterTerminate { labelStatus.text = null }
-                            .doOnSubscribe {
-                                progressBar.progress = 1.0
-                                labelStatus.text = "连接到 $ip:$port ..."
-                            }.subscribe({
-                        if (it.isEmpty()) showNotification(Alert.AlertType.WARNING, "没有连接的设备") else applyToDevice(it.first(), themeFilePath)
-                    }, { println(it.message) })
-                }
-            } else if (devices.size > 1) {
-                ChoiceDialog<String>(devices.first(), devices).apply {
-                    title = "选择设备"
-                    headerText = "选择需要应用主题的设备"
-                    contentText = "传输主题到设备"
-                }.showAndWait().ifPresent { applyToDevice(it, themeFilePath) }
-            } else applyToDevice(devices.first(), themeFilePath)
+            doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, themeFilePath) }
         } ?: showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
     }
 
@@ -209,61 +219,63 @@ class SelectorController : BaseController() {
 
     @FXML
     fun actionSnapshot() {
-        val outputBytes = ByteArrayOutputStream().also { DeviceUtils.snapshot(it) }.toByteArray()
-        Dialog<String>().apply {
-            val image = outputBytes.inputStream().use { Image(it) }
-            val contextMenu = ContextMenu().also {
-                it.items.addAll(MenuItem("export".lang()).also {
-                    it.setOnAction { writePng(outputBytes) }
-                }, MenuItem("copy".lang()).also {
-                    it.setOnAction { image.copy() }
-                }, MenuItem("close".lang()).also {
-                    it.setOnAction { close() }
-                })
-            }
-            isResizable = true
-            val imageView = ImageView(image).apply {
-                setOnContextMenuRequested { contextMenu.show(this, it.screenX, it.screenY) }
-            }
-
-            fun ImageView.resetFitWidth(width: Double) {
-                fitWidth = width
-                fitHeight = fitWidth / image.width * image.height
-            }
-
-            fun ImageView.resetFitHeight(height: Double) {
-                fitHeight = height
-                fitWidth = fitHeight / image.height * image.width
-            }
-            dialogPane.content = VBox(imageView).apply {
-                alignment = Pos.CENTER
-                padding = Insets.EMPTY
-            }
-            val copy = ButtonType("copy".lang(), ButtonBar.ButtonData.LEFT)
-            val export = ButtonType("export".lang(), ButtonBar.ButtonData.APPLY)
-            dialogPane.buttonTypes.addAll(copy, export, ButtonType("close".lang(), ButtonBar.ButtonData.CANCEL_CLOSE))
-            widthProperty().addListener { _, _, _ ->
-                imageView.resetFitWidth(dialogPane.scene.width)
-                if (imageView.fitHeight > dialogPane.scene.height) {
-                    imageView.resetFitHeight(dialogPane.scene.height)
+        doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") {
+            val outputBytes = ByteArrayOutputStream().apply { DeviceUtils.snapshot(it, this) }.toByteArray()
+            Dialog<String>().apply {
+                val image = outputBytes.inputStream().use { Image(it) }
+                val contextMenu = ContextMenu().also {
+                    it.items.addAll(MenuItem("export".lang()).also {
+                        it.setOnAction { writePng(outputBytes) }
+                    }, MenuItem("copy".lang()).also {
+                        it.setOnAction { image.copy() }
+                    }, MenuItem("close".lang()).also {
+                        it.setOnAction { close() }
+                    })
                 }
-            }
-            heightProperty().addListener { _, _, _ ->
-                imageView.resetFitHeight(dialogPane.scene.height)
-                if (imageView.fitWidth > dialogPane.scene.width) {
+                isResizable = true
+                val imageView = ImageView(image).apply {
+                    setOnContextMenuRequested { contextMenu.show(this, it.screenX, it.screenY) }
+                }
+
+                fun ImageView.resetFitWidth(width: Double) {
+                    fitWidth = width
+                    fitHeight = fitWidth / image.width * image.height
+                }
+
+                fun ImageView.resetFitHeight(height: Double) {
+                    fitHeight = height
+                    fitWidth = fitHeight / image.height * image.width
+                }
+                dialogPane.content = VBox(imageView).apply {
+                    alignment = Pos.CENTER
+                    padding = Insets.EMPTY
+                }
+                val copy = ButtonType("copy".lang(), ButtonBar.ButtonData.LEFT)
+                val export = ButtonType("export".lang(), ButtonBar.ButtonData.APPLY)
+                dialogPane.buttonTypes.addAll(copy, export, ButtonType("close".lang(), ButtonBar.ButtonData.CANCEL_CLOSE))
+                widthProperty().addListener { _, _, _ ->
                     imageView.resetFitWidth(dialogPane.scene.width)
+                    if (imageView.fitHeight > dialogPane.scene.height) {
+                        imageView.resetFitHeight(dialogPane.scene.height)
+                    }
                 }
-            }
-            Screen.getPrimary().visualBounds.let { imageView.resetFitHeight(it.height - 100) }
-            dialogPane.lookupButton(copy).addEventFilter(ActionEvent.ACTION, {
-                it.consume()
-                image.copy()
-            })
-            dialogPane.lookupButton(export).addEventFilter(ActionEvent.ACTION, {
-                it.consume()
-                writePng(outputBytes)
-            })
-        }.show()
+                heightProperty().addListener { _, _, _ ->
+                    imageView.resetFitHeight(dialogPane.scene.height)
+                    if (imageView.fitWidth > dialogPane.scene.width) {
+                        imageView.resetFitWidth(dialogPane.scene.width)
+                    }
+                }
+                Screen.getPrimary().visualBounds.let { imageView.resetFitHeight(it.height - 100) }
+                dialogPane.lookupButton(copy).addEventFilter(ActionEvent.ACTION, {
+                    it.consume()
+                    image.copy()
+                })
+                dialogPane.lookupButton(export).addEventFilter(ActionEvent.ACTION, {
+                    it.consume()
+                    writePng(outputBytes)
+                })
+            }.show()
+        }
     }
 
     private fun writePng(bytes: ByteArray) {
