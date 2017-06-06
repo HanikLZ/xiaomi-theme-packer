@@ -49,10 +49,16 @@ repositories {
 }
 
 jfx {
+    deployDir = "src/main/deploy"
     mainClass = 'org.mdvsc.tools.xiaomi.skin.ApplicationStarter'
     jfxMainAppJarName = "xiaomi.jar"
+    nativeReleaseVersion = "1.5.0"
     appName = '小米皮肤打包工具'
     vendor = 'mdvsc'
+    needShortcut = true
+    verbose = true
+    needMenu = true
+    bundleArguments = [ runtime: null ]
 }
 
 def testngVersion = '6.11'
