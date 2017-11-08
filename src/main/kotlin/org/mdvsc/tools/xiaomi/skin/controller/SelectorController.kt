@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
@@ -61,6 +62,8 @@ class SelectorController : BaseController() {
     private val themeSelectHistory = mutableListOf<String>()
     private val defaultNotificationDuration = 2000L
     private var defaultThemeTitle = ""
+
+    private var moduleNames: MutableList<String>? = null
 
     override fun onCreate(arguments: Map<String, String>) {
         super.onCreate(arguments)
@@ -175,7 +178,7 @@ class SelectorController : BaseController() {
     fun actionApply() {
         if (!(getThemeFile()?.let {
             val themeFilePath = it.absolutePath
-            doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, themeFilePath) }
+            doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, themeFilePath, moduleNames) }
         } ?: false)) showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
     }
 
@@ -205,6 +208,78 @@ class SelectorController : BaseController() {
         }.showDialog(stage)?.let {
             comboBoxPath.items.add(0, it.absolutePath)
         }
+    }
+
+    @FXML
+    fun actionExportSetting() {
+        Dialog<String>().apply {
+            initOwner(stage)
+            title = "选择临时包的模块"
+            //initStyle(StageStyle.TRANSPARENT) 隐藏标题
+
+            fun File.moduleList() = listFiles { _, name -> name != "description.xml" }
+
+
+            val box = VBox()
+            box.apply {
+                padding = Insets(10.0,20.0,20.0,20.0)
+            }
+
+            box.children.add(Label("提示:  全部不选时,包含所有模块").apply {
+                padding = Insets(0.0,0.0,20.0,0.0)
+            })
+
+            var checkList = mutableListOf<CheckBox>()
+
+            getThemeFile()?.let {
+                it.moduleList().forEach {
+                    val cb = CheckBox(it.name)
+                    if (moduleNames != null && moduleNames!!.contains(it.name)){
+                        cb.isSelected = true
+                    }
+                    box.children.add(cb)
+                    checkList.add(cb)
+                }
+            }
+
+            isResizable = true
+            dialogPane.content = VBox(box).apply {
+                alignment = Pos.CENTER
+                padding = Insets.EMPTY
+
+            }
+
+            val enter = ButtonType("enter".lang(), ButtonBar.ButtonData.OK_DONE)
+            val cancel = ButtonType("cancel".lang(), ButtonBar.ButtonData.CANCEL_CLOSE)
+            dialogPane.buttonTypes.addAll(enter, cancel)
+
+            fun enter() {
+                if (moduleNames==null) {
+                    moduleNames = mutableListOf()
+                } else {
+                    moduleNames!!.clear()
+                }
+
+                checkList.forEach {
+                    if (it.isSelected) moduleNames!!.add(it.text)
+                }
+                close()
+            }
+
+            fun cancel() {
+                close()
+            }
+
+
+            fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION, {
+                it.consume()
+                action()
+            })
+
+            enter.clickEvent { enter() }
+            cancel.clickEvent { cancel() }
+
+        }.show()
     }
 
     @FXML
@@ -333,9 +408,9 @@ class SelectorController : BaseController() {
         null
     }
 
-    private fun applyToDevice(device: String, dirPath: String) {
+    private fun applyToDevice(device: String, dirPath: String, fileNames: List<String>? = null) {
         val tempMtzFile = File.createTempFile("created", ".mtz")
-        saveMtz(dirPath, tempMtzFile.absolutePath, { Platform.runLater { progressBar.progress = it } }).map {
+        saveMtz(dirPath, tempMtzFile.absolutePath, { Platform.runLater { progressBar.progress = it } }, fileNames).map {
             Platform.runLater { labelStatus.text = "应用主题到手机中..." }
             DeviceUtils.applyTheme(device, tempMtzFile.absolutePath) {
                 if (it >= 0) Platform.runLater { progressBar.progress = it }
@@ -354,8 +429,8 @@ class SelectorController : BaseController() {
         }, { println(it.message) })
     }
 
-    private fun saveMtz(dirPath: String, targetFilePath: String, progress: ((Double) -> Unit)?) = Single.fromCallable {
-        MtzUtils.compressFileToMtz(dirPath, targetFilePath, progress)
+    private fun saveMtz(dirPath: String, targetFilePath: String, progress: ((Double) -> Unit)?, fileNames: List<String>? = null) = Single.fromCallable {
+        MtzUtils.compressFileToMtz(dirPath, targetFilePath, progress, fileNames)
     }
 
     private fun saveMtz(dirPath: String, targetFilePath: String, showNotification: Boolean = true) {
