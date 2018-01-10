@@ -229,7 +229,7 @@ class SelectorController : BaseController() {
                 padding = Insets(0.0,0.0,20.0,0.0)
             })
 
-            var checkList = mutableListOf<CheckBox>()
+            val checkList = mutableListOf<CheckBox>()
 
             getThemeFile()?.let {
                 it.moduleList().forEach {
@@ -446,10 +446,13 @@ class SelectorController : BaseController() {
         selectedTheme = MIUITheme.create(path)
         if (selectedTheme != null) {
             showNotification(Alert.AlertType.INFORMATION, "已打开主题")
-            if (themeSelectHistory.size < themeHistorySize.get(context.defaultProperties())) {
-                val p = selectedTheme?.themePath?.absolutePath ?: path
-                themeSelectHistory.apply { removeIf { it == p } }.add(0, p)
-                themeHistory.set(context.defaultProperties(), themeSelectHistory.toStringValue())
+            val p = selectedTheme?.themePath?.absolutePath ?: path
+            themeSelectHistory.apply { removeIf { it == p } }.add(0, p)
+            themeHistory.set(context.defaultProperties(), themeSelectHistory.toStringValue())
+            val maxSize = themeHistorySize.get(context.defaultProperties())
+            // 超过最大数量，移除最后一个
+            if (themeSelectHistory.size > maxSize) {
+                themeSelectHistory.removeAt(maxSize)
             }
         } else {
             showNotification(Alert.AlertType.ERROR, "无法找到 ${MIUITheme.THEME_DESCRIPTION_FILE_NAME}")
