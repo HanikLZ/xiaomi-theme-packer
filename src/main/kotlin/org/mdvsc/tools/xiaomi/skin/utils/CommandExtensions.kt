@@ -1,5 +1,6 @@
+package org.mdvsc.tools.xiaomi.skin.utils
+
 import org.apache.commons.lang3.SystemUtils
-import org.mdvsc.tools.xiaomi.skin.utils.ResourceUtils
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption

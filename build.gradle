@@ -1,76 +1,59 @@
-group 'com.taochuang.fenghks'
-
-buildscript {
-    ext.kotlinVersion = '1.1.3-eap-34'
-
-    repositories {
-        maven { url "http://maven.aliyun.com/nexus/content/groups/public"}
-        maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"}
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "de.dynamicfiles.projects.gradle.plugins:javafx-gradle-plugin:8.8.2"
-    }
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.10'
+    id 'org.openjfx.javafxplugin' version '0.0.5'
 }
 
-apply plugin: 'java'
-apply plugin: 'kotlin'
-apply plugin: 'application'
-apply plugin: 'javafx-gradle-plugin'
+def kotlinVersion = '1.3.10'
+def testngVersion = '7.0.0-beta1'
+def javafxVersion = '12-ea+2'
+def rxjavafxVersion = '2.2.2'
+def rxjavaVersion = '2.2.4'
+def commonsLang3Version = '3.8.1'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+group 'org.mdvsc.toots.xiaomi'
+sourceCompatibility = JavaVersion.VERSION_1_10
+targetCompatibility = JavaVersion.VERSION_1_10
 compileJava.options.encoding = 'UTF-8'
 
-mainClassName = 'org.mdvsc.tools.xiaomi.skin.ApplicationStarter'
+mainClassName = 'org.mdvsc.tools.xiaomi.skin/org.mdvsc.tools.xiaomi.skin.Main'
 
 compileKotlin {
+    destinationDir = compileJava.destinationDir
     kotlinOptions {
         jvmTarget = "1.8"
-        apiVersion = "1.1"
-        languageVersion = "1.1"
+        apiVersion = "1.3"
+        languageVersion = "1.3"
     }
 }
+
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
-        apiVersion = "1.1"
-        languageVersion = "1.1"
+        apiVersion = "1.3"
+        languageVersion = "1.3"
     }
+}
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.graphics', 'javafx.fxml' ]
 }
 
 repositories {
     maven { url "http://maven.aliyun.com/nexus/content/groups/public"}
-    maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1"}
-    mavenCentral()
     jcenter()
+    mavenCentral()
 }
-
-jfx {
-    deployDir = "src/main/deploy"
-    mainClass = 'org.mdvsc.tools.xiaomi.skin.ApplicationStarter'
-    jfxMainAppJarName = "xiaomi.jar"
-    nativeReleaseVersion = "1.5.0"
-    appName = '小米皮肤打包工具'
-    vendor = 'mdvsc'
-    needShortcut = true
-    verbose = true
-    needMenu = true
-    bundleArguments = [ runtime: null ]
-}
-
-def testngVersion = '6.11'
-def rxjavafxVersion = '2.1.0'
-def rxjavaVersion = '2.1.0'
-def commonsLang3Version = '3.5'
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
-    compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-    compile "io.reactivex.rxjava2:rxjavafx:$rxjavafxVersion"
-    compile "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
+    implementation "org.openjfx:javafx-base:$javafxVersion:mac"
+    implementation "org.openjfx:javafx-graphics:$javafxVersion:mac"
+    implementation "org.openjfx:javafx-fxml:$javafxVersion:mac"
+    implementation "org.openjfx:javafx-controls:$javafxVersion:mac"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.apache.commons:commons-lang3:$commonsLang3Version"
+    implementation "io.reactivex.rxjava2:rxjavafx:$rxjavafxVersion"
+    implementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
     testCompile "org.testng:testng:$testngVersion"
 }
 

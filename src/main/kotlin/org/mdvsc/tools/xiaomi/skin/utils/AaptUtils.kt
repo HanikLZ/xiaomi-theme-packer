@@ -1,7 +1,5 @@
 package org.mdvsc.tools.xiaomi.skin.utils
 
-import execute
-import outputExecutableBinary
 import java.io.File
 
 object AaptUtils {

@@ -1,7 +1,5 @@
 package org.mdvsc.tools.xiaomi.skin.utils
 
-import execute
-import outputExecutableBinary
 import java.io.File
 import java.io.OutputStream
 import java.util.regex.Pattern
