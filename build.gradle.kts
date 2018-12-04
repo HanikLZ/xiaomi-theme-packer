@@ -1,12 +1,16 @@
 plugins {
     application
     id("org.jetbrains.kotlin.jvm") version "1.3.10"
-    id("org.openjfx.javafxplugin") version "0.0.5"
+    // id("org.openjfx.javafxplugin") version "0.0.5"
     id("com.google.osdetector") version "1.6.0"
 }
 
+val moduleName = "org.mdvsc.tools.xiaomi.skin"
+val modules = listOf("javafx.controls", "javafx.graphics", "javafx.fxml", "kotlin.stdlib")
+val javaHome = System.getProperty("java.home")
+
 application {
-    mainClassName = "org.mdvsc.tools.xiaomi.skin/org.mdvsc.tools.xiaomi.skin.Main"
+    mainClassName = "$moduleName.ApplicationStarter"
 }
 
 java {
@@ -17,39 +21,60 @@ java {
 tasks {
     compileJava {
         options.encoding = "UTF-8"
+        inputs.property("moduleName", moduleName)
+        doFirst {
+            options.compilerArgs = listOf(
+                    "--module-path", classpath.asPath,
+                    "--patch-module", "$moduleName=${sourceSets["main"].output.asPath}"
+            )
+            classpath = files()
+        }
     }
     compileKotlin {
-        destinationDir = compileJava.get().destinationDir
         kotlinOptions {
             jvmTarget = "1.8"
             apiVersion = "1.3"
             languageVersion = "1.3"
         }
     }
+
+    named<JavaExec>("run") {
+        doFirst {
+            jvmArgs = listOf(
+                    "--module-path",
+                    listOf(configurations.runtimeClasspath.get().asPath, jar.get().archivePath).joinToString(File.pathSeparator)
+            ).plus(modules.flatMap { listOf("--add-modules", it) })
+        }
+    }
+
     create<Exec>("jlink") {
-        dependsOn(clean, jar)
-        workingDir("build")
-        val javaHome = try { property("org.gradle.java.home").toString() } catch (_: Exception) { System.getenv("JAVA_HOME") }
-        val fxJmods = try { property("path.to.fx.mods").toString() } catch (_: Exception) { System.getenv("PATH_TO_FX_MODS") } 
-        commandLine(
-                "$javaHome/bin/jlink",
-                "--module-path",
-                "libs${File.pathSeparatorChar}$fxJmods",
-                "--add-modules",
-                moduleName,
-                "--output",
-                moduleName,
-                "--strip-debug",
-                "--compress",
-                "2",
-                "--no-header-files",
-                "--no-man-pages")
+        dependsOn(jar)
+        val outputDir by extra("$buildDir/jlink")
+        doFirst {
+            delete(outputDir)
+            commandLine("$javaHome/bin/jlink",
+                    "--module-path",
+                    listOf("$javaHome/jmods/", configurations.runtimeClasspath.get().asPath, jar.get().archivePath).joinToString(File.pathSeparator),
+                    "--add-modules",
+                    moduleName,
+                    "--output",
+                    outputDir,
+                    "--launcher",
+                    "launch=$moduleName/${application.mainClassName}",
+                    "--strip-debug",
+                    "--compress",
+                    "2",
+                    "--no-header-files",
+                    "--no-man-pages")
+        }
     }
 }
 
+/*
 javafx {
     modules = listOf("javafx.controls", "javafx.graphics", "javafx.fxml")
 }
+*/
 
 repositories {
     jcenter()
@@ -69,8 +94,5 @@ dependencies {
     implementation("org.openjfx", "javafx-fxml", javafxVersion, classifier = platformClassifier)
     implementation("org.openjfx", "javafx-controls", javafxVersion, classifier = platformClassifier)
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", "1.3.20-dev-2214", classifier = "modular")
-    // implementation("org.apache.commons", "commons-lang3", "3.8.1")
-    // implementation("io.reactivex.rxjava2", "rxjavafx", "2.2.2")
-    // implementation("io.reactivex.rxjava2", "rxjava", "2.2.4")
     testImplementation("org.testng", "testng", "7.0.0-beta1")
 }

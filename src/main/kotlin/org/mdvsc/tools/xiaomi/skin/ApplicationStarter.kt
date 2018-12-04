@@ -34,7 +34,6 @@ class ApplicationStarter : Application(), Context {
         val appProperties = Properties()
         val appPropertiesFile = File(workPath, "preferences.properties")
 
-        /*
         @JvmStatic fun main(args: Array<String>) {
             appPropertiesFile.run {
                 if (!exists()) {
@@ -44,7 +43,7 @@ class ApplicationStarter : Application(), Context {
                 inputStream().use { appProperties.load(it) }
             }
             launch(ApplicationStarter::class.java, *args)
-        }*/
+        }
 
     }
 
