@@ -473,11 +473,13 @@ class SelectorController : BaseController() {
         if (duration > 0) {
             Single.just(notification).delay(duration, TimeUnit.MILLISECONDS)
                     .observeOn(JavaFxScheduler.platform())
-                    .subscribe({ labelNotification.fadeOut() }, { it.printStackTrace() })
+                    .subscribe({ labelNotification.fadeOut() }, {
+                        it.printStackTrace()
+                    })
         }
     }
 
-    private fun List<String>.toStringValue() = fold(StringBuilder(), { v, e -> v.append(e).append('|') }).run {
+    private fun List<String>.toStringValue() = fold(StringBuilder()) { v, e -> v.append(e).append('|') }.run {
         if (length > 0) dropLast(1) else this
     }.toString()
 
