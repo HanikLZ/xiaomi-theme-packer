@@ -12,7 +12,7 @@ abstract class BaseController {
     lateinit var context: Context
     lateinit var stage: Stage
 
-    open fun onCreate(arguments: Map<String, String>) {}
+    open fun onCreate(arguments: Map<String, String>) = Unit
     open fun onCloseRequest() = false
 
 }

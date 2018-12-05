@@ -18,7 +18,7 @@ import java.util.zip.ZipInputStream
 object MtzUtils {
 
     private val ignoreDirNames = listOf(".DS_Store")
-    private val ignoreZipDirNames = listOf("wallpaper")
+    private val ignoreZipDirNames = listOf("wallpaper","preview","boots","fonts")
 
     fun uncompressMtz(mtzPath: String, targetPath: String, root: Boolean = true): Boolean {
         fun File.uncompress(input: InputStream) {
@@ -59,14 +59,14 @@ object MtzUtils {
         val tempDirectory = Files.createTempDirectory(null).toFile()
         val fileProcessor: (File) -> File = { if (it.name.toLowerCase().endsWith(".9.png")) AaptUtils.process9png(it, tempDirectory) ?: it else it }
         ZipOutputStream(BufferedOutputStream(FileOutputStream(targetFile))).use {
-            val resourcesFile = File(resourcesPath)
-            var totalFiles = 1
+            var totalFiles : Int
             var processedFiles = 0
+            val resourcesFile = File(resourcesPath)
             createCompressedFile(it, if (resourcesFile.isDirectory) {
-                var fileList = if (fileNames == null || fileNames.isEmpty()) resourcesFile.listUsefulFiles() else resourcesFile.rootListFiles(fileNames)
-                fileList.apply { totalFiles = size }.map {
+                val fileList = if (fileNames == null || fileNames.isEmpty()) resourcesFile.listUsefulFiles() else resourcesFile.rootListFiles(fileNames)
+                fileList.apply { totalFiles = size }.map { file ->
                     progress?.invoke((++processedFiles).toDouble() / totalFiles.toDouble())
-                    if (it.isDirectory && !ignoreZipDirNames.contains(it.name)) compressFile(it, File(tempDirectory, it.name), fileProcessor) else it
+                    if (file.isDirectory && !ignoreZipDirNames.contains(file.name)) compressFile(file, File(tempDirectory, file.name), fileProcessor) else file
                 }.toTypedArray()
             } else arrayOf(resourcesFile), fileProcessor = fileProcessor)
         }
@@ -91,9 +91,9 @@ object MtzUtils {
                 val file = fileProcessor?.invoke(it) ?: it
                 out.putNextEntry(ZipEntry("$path${file.name}"))
                 val buffer = ByteArray(1024)
-                FileInputStream(file).use {
+                FileInputStream(file).use { input ->
                     do {
-                        val readLen = it.read(buffer)
+                        val readLen = input.read(buffer)
                         if (readLen > 0) out.write(buffer, 0, readLen)
                     } while (readLen > 0)
                 }
@@ -103,6 +103,6 @@ object MtzUtils {
 
     private fun File.listUsefulFiles() = listFiles { _, name -> !ignoreDirNames.contains(name) }
 
-    private fun File.rootListFiles(fileNames: List<String>) = listFiles { _, name -> "description.xml".equals(name) || fileNames.contains(name) }
+    private fun File.rootListFiles(fileNames: List<String>) = listFiles { _, name -> "description.xml" == name || fileNames.contains(name) }
 }
 

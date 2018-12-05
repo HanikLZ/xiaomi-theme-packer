@@ -54,16 +54,6 @@ class PreferenceController : BaseController() {
     }
 
     @FXML
-    fun actionPurchase() {
-        Alert(Alert.AlertType.INFORMATION).apply {
-            initOwner(stage)
-            title = "支付"
-            headerText = "支付"
-            contentText = "你好"
-        }.showAndWait()
-    }
-
-    @FXML
     fun actionContact() {
         Alert(Alert.AlertType.INFORMATION).apply {
             initOwner(stage)

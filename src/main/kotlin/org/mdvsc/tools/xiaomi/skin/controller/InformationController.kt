@@ -16,18 +16,16 @@ class InformationController : BaseController() {
     @FXML lateinit var textFieldDesigner : TextField
     @FXML lateinit var textFieldTitle : TextField
 
-    @FXML lateinit var buttonUiVersionV7 : ToggleButton
     @FXML lateinit var buttonUiVersionV8 : ToggleButton
-    @FXML lateinit var buttonUiVersionV9 : ToggleButton
+    @FXML lateinit var buttonUiVersionV10 : ToggleButton
 
     private val uiVersionButtonMap = mutableMapOf<Int, ToggleButton>()
 
     override fun onCreate(arguments: Map<String, String>) {
         super.onCreate(arguments)
         stage.initStyle(StageStyle.UNDECORATED)
-        uiVersionButtonMap[5] = buttonUiVersionV7
         uiVersionButtonMap[6] = buttonUiVersionV8
-        uiVersionButtonMap[7] = buttonUiVersionV9
+        uiVersionButtonMap[8] = buttonUiVersionV10
         SelectorController.selectedTheme?.let {
             textFieldAuthor.text = it.getThemeAuthor()
             textFieldDesigner.text = it.getThemeDesigner()

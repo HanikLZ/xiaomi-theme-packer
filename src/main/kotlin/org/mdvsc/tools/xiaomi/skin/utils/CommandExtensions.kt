@@ -1,6 +1,5 @@
-package org.mdvsc.tools.xiaomi.skin.utils
-
 import org.apache.commons.lang3.SystemUtils
+import org.mdvsc.tools.xiaomi.skin.utils.ResourceUtils
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -20,7 +19,7 @@ private fun InputStream.forEach(action: (String) -> Boolean) = BufferedReader(In
 fun List<String>.execute(outputStream: OutputStream) = ProcessBuilder(this)
         .redirectErrorStream(true)
         .start().let { process ->
-    val commandLine = fold(StringBuilder(), {v, e -> v.append(e).append(' ')}).trim()
+    val commandLine = joinToString(" ").trim()
     println("run command \"$commandLine\"")
     try {
         process.inputStream.copyTo(outputStream)
@@ -39,7 +38,7 @@ fun List<String>.execute(messageCallback: ((String) -> Boolean) = {
 }) = ProcessBuilder(this)
         .redirectErrorStream(true)
         .start().let { process ->
-    val commandLine = fold(StringBuilder(), {v, e -> v.append(e).append(' ')}).trim()
+    val commandLine = joinToString(" ").trim()
     println("run command \"$commandLine\"")
     try {
         if (process.inputStream.forEach(messageCallback)) {
@@ -57,13 +56,13 @@ fun List<String>.execute(messageCallback: ((String) -> Boolean) = {
 
 fun outputExecutableBinary(resourcePath: String) : String {
     var extensions = ""
-    val name = if (SystemUtils.IS_OS_MAC) {
-        "/binary/mac/$resourcePath"
-    } else if (SystemUtils.IS_OS_LINUX) {
-        "/binary/linux/$resourcePath"
-    } else {
-        extensions = ".exe"
-        "/binary/windows/$resourcePath"
+    val name = when {
+        SystemUtils.IS_OS_MAC -> "/binary/mac/$resourcePath"
+        SystemUtils.IS_OS_LINUX -> "/binary/linux/$resourcePath"
+        else -> {
+            extensions = ".exe"
+            "/binary/windows/$resourcePath"
+        }
     }
     val file = ResourceUtils.getResourceInputStream(name).use {
         File.createTempFile("${resourcePath.substringAfterLast('/')}_", extensions).apply {
@@ -73,12 +72,12 @@ fun outputExecutableBinary(resourcePath: String) : String {
         }
     }
     try {
-        ResourceUtils.getResourceInputStream("$name-lib").use {
+        ResourceUtils.getResourceInputStream("$name-lib").use { inputStream ->
             val parentFile = file.parentFile
-            ZipInputStream(BufferedInputStream(it)).use { input ->
+            ZipInputStream(BufferedInputStream(inputStream)).use { input ->
                 do {
                     input.nextEntry?.let { entry ->
-                        val outFile = parentFile?.let { File(it, entry.name) } ?: File(name)
+                        val outFile = parentFile?.run { File(this, entry.name) } ?: File(name)
                         if (!outFile.exists()) {
                             outFile.apply {
                                 parentFile?.mkdirs()

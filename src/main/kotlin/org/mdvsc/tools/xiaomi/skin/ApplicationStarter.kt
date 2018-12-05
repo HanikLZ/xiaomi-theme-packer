@@ -50,8 +50,8 @@ class ApplicationStarter : Application(), Context {
     private fun <T : BaseController> Stage.loadLayout(path: String, args: Map<String, String> = emptyMap()): T {
         val loader = FXMLLoader(ResourceUtils.getResourceURL(path))
         scene = Scene(loader.load()).also {
-            var sx : Double = 0.0
-            var sy : Double = 0.0
+            var sx = 0.0
+            var sy = 0.0
             it.onMousePressed = EventHandler<MouseEvent> { event ->
                 sx = event.sceneX
                 sy = event.sceneY

@@ -16,7 +16,6 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
@@ -176,10 +175,9 @@ class SelectorController : BaseController() {
 
     @FXML
     fun actionApply() {
-        if (!(getThemeFile()?.let {
-            val themeFilePath = it.absolutePath
-            doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, themeFilePath, moduleNames) }
-        } ?: false)) showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
+        if (getThemeFile()?.let { file ->
+            doDeviceAction("选择设备", "选择需要应用主题的设备", "传输主题到设备") { applyToDevice(it, file.absolutePath, moduleNames) }
+        } != true) showNotification(Alert.AlertType.ERROR, "不是合法的主题路径")
     }
 
     @FXML
@@ -231,15 +229,13 @@ class SelectorController : BaseController() {
 
             val checkList = mutableListOf<CheckBox>()
 
-            getThemeFile()?.let {
-                it.moduleList().forEach {
-                    val cb = CheckBox(it.name)
-                    if (moduleNames != null && moduleNames!!.contains(it.name)){
-                        cb.isSelected = true
-                    }
-                    box.children.add(cb)
-                    checkList.add(cb)
+            getThemeFile()?.moduleList()?.forEach {
+                val cb = CheckBox(it.name)
+                if (moduleNames?.contains(it.name) == true){
+                    cb.isSelected = true
                 }
+                box.children.add(cb)
+                checkList.add(cb)
             }
 
             isResizable = true
@@ -271,10 +267,10 @@ class SelectorController : BaseController() {
             }
 
 
-            fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION, {
+            fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION) {
                 it.consume()
                 action()
-            })
+            }
 
             enter.clickEvent { enter() }
             cancel.clickEvent { cancel() }
@@ -306,15 +302,10 @@ class SelectorController : BaseController() {
                 }
 
                 val contextMenu = ContextMenu().also {
-                    it.items.addAll(MenuItem("export".lang()).also {
-                        it.setOnAction { writePng(outputBytes) }
-                    }, MenuItem("copy".lang()).also {
-                        it.setOnAction { image.copy() }
-                    }, MenuItem("refresh".lang()).also {
-                        it.setOnAction { refreshSnapshot() }
-                    }, MenuItem("close".lang()).also {
-                        it.setOnAction { close() }
-                    })
+                    it.items.addAll(MenuItem("export".lang()).apply { setOnAction { writePng(outputBytes) } },
+                            MenuItem("copy".lang()).apply { setOnAction { image.copy() } },
+                            MenuItem("refresh".lang()).apply { setOnAction { refreshSnapshot() } },
+                            MenuItem("close".lang()).apply { setOnAction { close() } })
                 }
                 isResizable = true
                 imageView.setOnContextMenuRequested { contextMenu.show(imageView, it.screenX, it.screenY) }
@@ -349,10 +340,10 @@ class SelectorController : BaseController() {
                     }
                 }
                 Screen.getPrimary().visualBounds.let { imageView.resetFitHeight(it.height - 100) }
-                fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION, {
+                fun ButtonType.clickEvent(action: () -> Unit) = dialogPane.lookupButton(this).addEventFilter(ActionEvent.ACTION) {
                     it.consume()
                     action()
-                })
+                }
                 copy.clickEvent { image.copy() }
                 export.clickEvent { writePng(outputBytes) }
                 refresh.clickEvent { refreshSnapshot() }
@@ -373,12 +364,12 @@ class SelectorController : BaseController() {
                 initialFileName = file.name
             }
             extensionFilters.addAll(FileChooser.ExtensionFilter("png图像", "*.png"))
-        }.showSaveDialog(stage)?.let {
-            if (it.exists()) it.delete()
-            it.createNewFile()
-            it.outputStream().use { it.write(bytes) }
-            showNotification(Alert.AlertType.INFORMATION, "保存屏幕截图 ${it.name}")
-            screenshotHistory.set(context.defaultProperties(), it.absolutePath)
+        }.showSaveDialog(stage)?.let { file ->
+            if (file.exists()) file.delete()
+            file.createNewFile()
+            file.outputStream().use { it.write(bytes) }
+            showNotification(Alert.AlertType.INFORMATION, "保存屏幕截图 ${file.name}")
+            screenshotHistory.set(context.defaultProperties(), file.absolutePath)
         }
     }
 
@@ -412,8 +403,8 @@ class SelectorController : BaseController() {
         val tempMtzFile = File.createTempFile("created", ".mtz")
         saveMtz(dirPath, tempMtzFile.absolutePath, { Platform.runLater { progressBar.progress = it } }, fileNames).map {
             Platform.runLater { labelStatus.text = "应用主题到手机中..." }
-            DeviceUtils.applyTheme(device, tempMtzFile.absolutePath) {
-                if (it >= 0) Platform.runLater { progressBar.progress = it }
+            DeviceUtils.applyTheme(device, tempMtzFile.absolutePath) { progress ->
+                if (progress >= 0) Platform.runLater { progressBar.progress = progress }
                 false
             }
         }.defaultScheduler().doOnSubscribe { labelStatus.text = "生成临时MTZ包中..." }
@@ -473,9 +464,7 @@ class SelectorController : BaseController() {
         if (duration > 0) {
             Single.just(notification).delay(duration, TimeUnit.MILLISECONDS)
                     .observeOn(JavaFxScheduler.platform())
-                    .subscribe({ labelNotification.fadeOut() }, {
-                        it.printStackTrace()
-                    })
+                    .subscribe({ labelNotification.fadeOut() }, { it.printStackTrace() })
         }
     }
 
@@ -492,8 +481,8 @@ class SelectorController : BaseController() {
 
     private fun File.themePath() = let {
         if (isFile) {
-            val outFile = File(parentFile, nameWithoutExtension).let {
-                if (it.name == name) File(parentFile, "$name.unpack") else it
+            val outFile = File(parentFile, nameWithoutExtension).let { file ->
+                if (file.name == name) File(parentFile, "$name.unpack") else file
             }
             MtzUtils.uncompressMtz(absolutePath, outFile.absolutePath)
             outFile

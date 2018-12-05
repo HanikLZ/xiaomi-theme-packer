@@ -17,11 +17,11 @@
             <Separator prefHeight="0.5" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" />
             <Label alignment="CENTER" layoutX="275.0" layoutY="20.0" prefHeight="50.0" prefWidth="570.0" style="-fx-background-color: #FFFFFF;" text="设置" textFill="#333333" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <font>
-                    <Font name="Heiti SC Light" size="16.0" />
+                    <Font size="16.0" />
                 </font></Label>
             <Button id="closeButton" alignment="CENTER" layoutX="547.0" layoutY="4.0" onAction="#actionClose" prefHeight="40.0" prefWidth="40.0" textFill="#999999" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                 <font>
-                    <Font name="Heiti SC Light" size="15.0" />
+                    <Font size="15.0" />
                 </font>
             </Button>
         </children>
@@ -38,7 +38,7 @@
             <children>
                <Label alignment="CENTER" text="无线应用主题" textFill="#666666">
                   <font>
-                     <Font name="Heiti SC Light" size="15.0" />
+                     <Font size="15.0" />
                   </font></Label>
             </children>
             <opaqueInsets>
@@ -50,7 +50,7 @@
          </HBox>
             <Label text="ip" textFill="#999999">
                 <font>
-                    <Font name="Heiti SC Light" size="14.0" />
+                    <Font size="14.0" />
                 </font>
                 <VBox.margin>
                     <Insets left="10.0" top="4.0" />
@@ -61,7 +61,7 @@
                     <Insets top="4.0" />
                 </VBox.margin>
                 <font>
-                    <Font name="Heiti SC Light" size="16.0" />
+                    <Font size="16.0" />
                 </font>
             </TextField>
             <Label text="端口" textFill="#999999">
@@ -69,7 +69,7 @@
                     <Insets left="10.0" top="19.0" />
                 </VBox.margin>
                 <font>
-                    <Font name="Heiti SC Light" size="14.0" />
+                    <Font size="14.0" />
                 </font>
             </Label>
             <TextField fx:id="textFieldPort" prefHeight="40.0" prefWidth="400.0" promptText="5555">
@@ -77,14 +77,14 @@
                     <Insets top="4.0" />
                 </VBox.margin>
                 <font>
-                    <Font name="Heiti SC Light" size="16.0" />
+                    <Font size="16.0" />
                 </font>
             </TextField>
             <ButtonBar>
                 <buttons>
                     <Button alignment="CENTER" mnemonicParsing="false" onAction="#actionOk" prefHeight="40.0" prefWidth="80.0" text="确认" textFill="#333333">
                         <font>
-                            <Font name="Heiti SC Light" size="15.0" />
+                            <Font size="15.0" />
                         </font>
                     </Button>
                 </buttons>
@@ -99,9 +99,9 @@
          </Separator>
          <HBox alignment="CENTER">
             <children>
-               <Label alignment="CENTER" text="其他功能" textFill="#666666">
+               <Label alignment="CENTER" text="关于编辑器" textFill="#666666">
                   <font>
-                     <Font name="Heiti SC Light" size="15.0" />
+                     <Font size="15.0" />
                   </font></Label>
             </children>
             <VBox.margin>
@@ -115,12 +115,12 @@
          </HBox>
          <Label prefHeight="20.0" prefWidth="150.0" text="QQ群:626989602" textFill="#999999">
             <font>
-               <Font name="Heiti SC Light" size="12.0" />
+               <Font size="12.0" />
             </font>
          </Label>
-         <Label prefHeight="20.0" prefWidth="150.0" text="当前版本: v1.5" textFill="#999999">
+         <Label prefHeight="20.0" prefWidth="150.0" text="当前版本: v1.6.0" textFill="#999999">
             <font>
-               <Font name="Heiti SC Light" size="12.0" />
+               <Font size="12.0" />
             </font>
             <VBox.margin>
                <Insets />

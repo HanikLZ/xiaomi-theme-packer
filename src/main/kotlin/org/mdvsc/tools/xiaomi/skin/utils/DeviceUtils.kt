@@ -1,5 +1,7 @@
 package org.mdvsc.tools.xiaomi.skin.utils
 
+import execute
+import outputExecutableBinary
 import java.io.File
 import java.io.OutputStream
 import java.util.regex.Pattern
@@ -28,11 +30,11 @@ object DeviceUtils {
     fun connect(ip: String, port: Int) = listOf(adbExecutablePath, "connect", "$ip:$port").execute()
 
     fun devices() = mutableListOf<String>().also { results ->
-        listOf(adbExecutablePath, "devices").execute({
-            val line = it.split(' ', '\t').map { it.trim() }
+        listOf(adbExecutablePath, "devices").execute { device ->
+            val line = device.split(' ', '\t').map { it.trim() }
             if (line.size == 2 && line[1] == "device") results.add(line.first())
             false
-        })
+        }
     }
 
     fun pushFile(device: String, filePath: String, devicePath: String, progress: (Double) -> Boolean) = listOf(adbExecutablePath, "-s", device, "push", filePath, devicePath).execute {

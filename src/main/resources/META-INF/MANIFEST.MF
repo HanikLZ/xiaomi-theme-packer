@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path: rxjavafx-2.1.0.jar jcommander-1.64.jar snakeyaml-1.17.jar 
+ testng-6.11.jar rxjava-2.1.0.jar kotlin-stdlib-1.1.3-eap-34.jar kotli
+ n-stdlib-jre7-1.1.3-eap-34.jar annotations-13.0.jar reactive-streams-
+ 1.0.0.jar commons-lang3-3.5.jar kotlin-stdlib-jre8-1.1.3-eap-34.jar
+Main-Class: org.mdvsc.tools.xiaomi.skin.ApplicationStarter
+
